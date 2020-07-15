@@ -2,11 +2,11 @@
 
 using namespace std;
 
-void compress(string text, string &compressedfileName) {
+void compress(string text, string &compressedfileName, int &bitlength) {
     map<string, int> dictionary;
     map<string, pair<int, int>> metric_values;
     set<pair<pair<int, int>, string>> metric;
-    int time = 0, n = text.length(), limit = (1 << 15);
+    int time = 0, n = text.length(), limit = (1 << bitlength) - 1;
     for (int i = 0; i < 256; ++i) {
         string key;
         key += char(i);
@@ -22,7 +22,8 @@ void compress(string text, string &compressedfileName) {
         if (dictionary.find(next) != dictionary.end()) {
             current = next;
             continue;
-        } else {
+        }
+        else {
             compressed.push_back(dictionary[current]);
             if (dictionary[current] >= 256) {
                 metric.erase({metric_values[current], current});
@@ -35,7 +36,8 @@ void compress(string text, string &compressedfileName) {
                 dictionary[next] = code;
                 metric_values[next] = {0, time};
                 metric.insert({metric_values[next], next});
-            } else {
+            }
+            else {
                 auto infrequent = *metric.begin();
                 metric.erase(infrequent);
                 metric_values.erase(infrequent.second);
@@ -50,18 +52,19 @@ void compress(string text, string &compressedfileName) {
     }
     compressed.push_back(dictionary[current]);
     ofstream compressedFile(compressedfileName);
+    compressedFile << bitlength << " ";
     for (auto e : compressed) compressedFile << e << " ";
 }
 
-void decompress(vector<int> compressed, string &decompressedfileName) {
+void decompress(vector<int> compressed, string &decompressedfileName, int &bitlength) {
     ofstream decompressedFile(decompressedfileName);
     int n = compressed.size();
 
-    vector<string> decode((1 << 15) + 1);
-    vector<pair<int, int>> metric_values((1 << 15) + 1);
+    vector<string> decode(1 << bitlength);
+    vector<pair<int, int>> metric_values(1 << bitlength);
     set<pair<pair<int, int>, int>> metric;
 
-    int limit = (1 << 15);
+    int limit = (1 << bitlength);
     for (int i = 0; i < 256; ++i) {
         string value;
         value += char(i);
@@ -77,7 +80,8 @@ void decompress(vector<int> compressed, string &decompressedfileName) {
             if (compressed[i] != code) {
                 current += decode[compressed[i]];
                 value += current[0];
-            } else {
+            }
+            else {
                 value += value[0];
                 current = value;
             }
@@ -91,7 +95,7 @@ void decompress(vector<int> compressed, string &decompressedfileName) {
                 metric.insert({metric_values[compressed[i]], compressed[i]});
             }
             code++;
-            if (code > limit)full = 1;
+            if (code >= limit)full = 1;
         }
         else {
             auto infrequent = *metric.begin();
@@ -100,7 +104,8 @@ void decompress(vector<int> compressed, string &decompressedfileName) {
             if (compressed[i] != code) {
                 current += decode[compressed[i]];
                 value += current[0];
-            } else {
+            }
+            else {
                 value += value[0];
                 current = value;
             }
@@ -124,7 +129,7 @@ int main() {
     cin.tie(0);
     string command;
     cout << "Types of command :" << endl << flush;
-    cout << "1. c file_name compressed_file_name " << endl << flush;
+    cout << "1. c file_name compressed_file_name bit_length_of_compressed_file" << endl << flush;
     cout << "2. d file_name decompressed_file_name " << endl << flush;
     cin >> command;
     char choice = command[0];
@@ -132,29 +137,34 @@ int main() {
         if (choice == 'c') {
             fstream file;
             string filename, word, compressedfileName;
-            cin >> filename >> compressedfileName;
+            int bitlength;
+            cin >> filename >> compressedfileName >> bitlength;
             file.open(filename.c_str());
             string text;
             while (file >> word) {
                 if (!text.empty())text += " ";
                 text += word;
             }
-            compress(text, compressedfileName);
-        } else if (choice == 'd') {
+            compress(text, compressedfileName, bitlength);
+        }
+        else if (choice == 'd') {
             fstream file;
             string filename, decompressedfileName;
-            int code;
+            int code, bitlength;
             cin >> filename >> decompressedfileName;
             file.open(filename);
             vector<int> compressed;
+            file >> bitlength;
             while (file >> code) {
                 compressed.push_back(code);
             }
-            decompress(compressed, decompressedfileName);
-        } else {
+            decompress(compressed, decompressedfileName, bitlength);
+        }
+        else {
             cout << "Wrong Command!!!" << endl;
         }
-    } else {
+    }
+    else {
         cout << "Unidentifiable input format!!!" << endl;
     }
 }
