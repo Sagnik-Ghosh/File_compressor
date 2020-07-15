@@ -9,21 +9,13 @@ void compress(string text, string filename) {
     int time = 0, n = text.length(), limit = (1 << 15);
     for (int i = 0; i < 256; ++i) {
         string key;
-        if (i >= 32 and i <= 126) {
-            key += char(i);
-            dictionary[key] = i;
-        } else {
-            key += char(i);
-            dictionary[key] = i;
-            metric_values[key] = {0, 0};
-            metric.insert({metric_values[key], key});
-        }
+        key += char(i);
+        dictionary[key] = i;
     }
     int code = 255;
     string current;
     current += text[0];
     vector<int> compressed;
-    int zeros = 0;
     for (int i = 1; i < n; ++i) {
         ++time;
         string next = current + text[i];
@@ -32,7 +24,7 @@ void compress(string text, string filename) {
             continue;
         } else {
             compressed.push_back(dictionary[current]);
-            if (dictionary[current] < 32 or dictionary[current] > 126) {
+            if (dictionary[current] >= 256) {
                 metric.erase({metric_values[current], current});
                 metric_values[current].first++;
                 metric_values[current].second = time;
@@ -57,9 +49,9 @@ void compress(string text, string filename) {
         }
     }
     compressed.push_back(dictionary[current]);
-    string compressedfile = "compressed_" + filename;
+    string compressedfile = filename;
     ofstream outputFile(compressedfile);
-    for (auto e: compressed) outputFile << e << " ";
+    for (auto e : compressed) outputFile << e << " ";
 }
 
 void decompress(vector<int> compressed, string filename) {
@@ -98,15 +90,15 @@ int main() {
     cin >> choice;
     if (choice == 'c') {
         fstream file;
-        string filename, word;
-        cin >> filename;
+        string filename, word, compressed_file_name;
+        cin >> filename >> compressed_file_name;
         file.open(filename.c_str());
         string text;
         while (file >> word) {
             if (!text.empty())text += " ";
             text += word;
         }
-        compress(text, filename);
+        compress(text, compressed_file_name);
     } else {
         fstream file;
         string filename;
