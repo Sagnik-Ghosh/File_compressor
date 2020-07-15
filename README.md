@@ -4,8 +4,8 @@
 
 - In order to execute the program for compression the user has to type:\
   c fileName compressedFileName bitlengthOfCompressedFile\
-  A file with name compressed_file_name will be created. 
+  A file with name compressedFileName will be created. 
 - In order to execute the program to decompress a file the user has to type:\
   d compressedFileName fileName\
-  A file with name file_name will be created. 
+  A file with name fileName will be created. 
 
