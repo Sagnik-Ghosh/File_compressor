@@ -5,6 +5,7 @@
 - In order to execute the program for compression the user has to type:\
   c file_name compressed_file_name
   A file with name compressed_file_name will be created. 
-- In order to execute the program to decompress a file the user has to type:\ 
-  d compressed_file_name filename
+- In order to execute the program to decompress a file the user has to type:\
+  d compressed_file_name file_name
   A file with name file_name will be created. 
+
